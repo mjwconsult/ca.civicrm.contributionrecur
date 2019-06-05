@@ -3,6 +3,9 @@ ca.civicrm.contribution_recur
 
 Useful extensions of recurring contribution functionality in CiviCRM. Particularly useful for larger installations, with some functions only available for some payment processors. You'll want to go the configuration screen in Admin -> CiviContribute -> Recurring Contribution Settings after enabling it.
 
+## MJW Version
+* Adds a "Basic" recurring processor.
+
 ## Reports
 
 Backported and extended Jamie McClelland's Report in https://issues.civicrm.org/jira/browse/CRM-15453.
