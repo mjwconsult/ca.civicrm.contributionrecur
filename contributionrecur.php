@@ -82,44 +82,6 @@ function contributionrecur_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_managed
  */
 function contributionrecur_civicrm_managed(&$entities) {
-  $entities[] = array(
-    'module' => 'ca.civicrm.contributionrecur',
-    'name' => 'ContributionRecur',
-    'entity' => 'PaymentProcessorType',
-    'params' => array(
-      'version' => 3,
-      'name' => 'Recurring Offline Credit Card Contribution',
-      'title' => 'Offline Credit Card',
-      'description' => 'Offline credit card dummy payment processor.',
-      'class_name' => 'Payment_RecurOffline',
-      'billing_mode' => 'form',
-      'user_name_label' => 'Account (ignored)',
-      'password_label' => 'Password (ignored)',
-      'url_site_default' => 'https://github.com/adixon/ca.civicrm.contributionrecur',
-      'url_site_test_default' => 'https://github.com/adixon/ca.civicrm.contributionrecur',
-      'is_recur' => 1,
-      'payment_type' => 1,
-    ),
-  );
-  $entities[] = array(
-    'module' => 'ca.civicrm.contributionrecur',
-    'name' => 'ContributionRecurACHEFT',
-    'entity' => 'PaymentProcessorType',
-    'params' => array(
-      'version' => 3,
-      'name' => 'Recurring Offline ACH/EFT Contribution',
-      'title' => 'Offline ACH/EFT',
-      'description' => 'Offline ACH/EFT dummy payment processor.',
-      'class_name' => 'Payment_RecurOfflineACHEFT',
-      'billing_mode' => 'form',
-      'user_name_label' => 'Account (ignored)',
-      'password_label' => 'Password (ignored)',
-      'url_site_default' => 'https://github.com/adixon/ca.civicrm.contributionrecur',
-      'url_site_test_default' => 'https://github.com/adixon/ca.civicrm.contributionrecur',
-      'is_recur' => 1,
-      'payment_type' => 2,
-    ),
-  );
   _contributionrecur_civix_civicrm_managed($entities);
 }
 
