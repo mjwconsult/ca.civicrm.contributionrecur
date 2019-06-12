@@ -1,6 +1,7 @@
 <?php
 
 require_once 'contributionrecur.civix.php';
+use CRM_Contributionrecur_ExtensionUtil as E;
 
 /**
  * Implementation of hook_civicrm_config
@@ -444,7 +445,7 @@ function contributionrecur_CRM_Contribute_Form_Contribution_Main(&$form) {
    
 }
 
-/* 
+/*
  * add some functionality to the update subscription form for recurring contributions 
  *
  * Todo: make the available new fields configurable
@@ -676,4 +677,13 @@ function contributionrecur_civicrm_tabset($tabsetName, &$tabs, $context) {
       array_slice($tabs, 4)
     );
   }
-} 
+}
+
+function contributionrecur_civicrm_buildAmount($pageType, &$form, &$amount) {
+  foreach ($form->_values['fee'] as $fieldId => $fieldDetail) {
+    if ($fieldDetail['name'] === 'other_amount') {
+      $form->setDefaults(["price_{$fieldId}" => CRM_Utils_Request::retrieve('fixed_amount', 'Float')]);
+      CRM_Core_Resources::singleton()->addScriptFile(E::LONG_NAME, 'js/hideotheramount.js');
+    }
+  }
+}
