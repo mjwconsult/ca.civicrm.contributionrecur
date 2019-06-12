@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <extension key="ca.civicrm.contributionrecur" type="module">
   <file>contributionrecur</file>
-  <name>Recurring Contributions</name>
+  <name>Recurring Contributions (MJWConsulting version</name>
   <description>Recurring contributions, additional functionality</description>
   <license>AGPL-3.0</license>
   <maintainer>
@@ -12,13 +12,12 @@
     <url desc="Main Extension Page">https://github.com/mattwire/ca.civicrm.contributionrecur</url>
     <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
-  <releaseDate>2019-06-05</releaseDate>
-  <version>1.1</version>
-  <develStage>beta</develStage>
+  <releaseDate>2019-06-12</releaseDate>
+  <version>1.2</version>
+  <develStage>stable</develStage>
   <compatibility>
     <ver>5.13</ver>
   </compatibility>
-  <comments>This module is being incubated</comments>
   <civix>
     <namespace>CRM/Contributionrecur</namespace>
   </civix>
