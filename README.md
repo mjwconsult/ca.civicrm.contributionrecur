@@ -5,6 +5,8 @@ Useful extensions of recurring contribution functionality in CiviCRM. Particular
 
 ## MJW Version
 * Adds a "Basic" recurring processor.
+* Hide recurring checkbox on contribution pages if forced.
+* Allow passing in "Other amount" via fixed_amount parameter on URL (configure a contribution page with other amount enabled) - other amount will be set to the value of the URL parameter and hidden.
 
 ## Reports
 
