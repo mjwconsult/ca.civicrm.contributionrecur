@@ -10,6 +10,7 @@ cj(function ($) {
   'use strict';
   var recurSettings = (typeof CRM.contributionrecur == 'undefined') ? CRM.vars.contributionrecur : CRM.contributionrecur;
   if (recurSettings.forceRecur == '1') {
+    $('#is_recur').hide();
     $('#is_recur').click(function(e) {
       e.preventDefault();
       e.stopPropagation();
