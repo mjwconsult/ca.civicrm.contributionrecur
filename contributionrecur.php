@@ -137,63 +137,32 @@ function contributionrecur_civicrm_navigationMenu(&$navMenu) {
   }
 }
 
-function _contributionrecur_civicrm_domain_info($key) {
-  static $domain;
-  if (empty($domain)) {
-    $domain = civicrm_api('Domain', 'getsingle', array('version' => 3, 'current_domain' => TRUE));
-  }
-  switch($key) {
-    case 'version':
-      return explode('.',$domain['version']);
-    default:
-      if (!empty($domain[$key])) {
-        return $domain[$key];
-      }
-      $config_backend = unserialize($domain['config_backend']);
-      return $config_backend[$key];
-  }
-}
-
-function _contributionrecur_civicrm_nscd_fid() {
-  $version = _contributionrecur_civicrm_domain_info('version');
-  return (($version[0] <= 4) && ($version[1] <= 3)) ? 'next_sched_contribution' : 'next_sched_contribution_date';
-}
-
 function contributionrecur_civicrm_varset($vars) {
-  $version = CRM_Utils_System::version();
-  if (version_compare($version, '4.5') < 0) { /// support 4.4!
-    CRM_Core_Resources::singleton()->addSetting(array('contributionrecur' => $vars));
-  }
-  else {
-    CRM_Core_Resources::singleton()->addVars('contributionrecur', $vars);
-  }
+  CRM_Core_Resources::singleton()->addVars('contributionrecur', $vars);
 }
 
-/*
+/**
  * hook_civicrm_buildForm
  *
- * Do a Drupal 7 style thing so we can write smaller functions
+ * @param string $formName
+ * @param \CRM_Core_Form $form
  */
 function contributionrecur_civicrm_buildForm($formName, &$form) {
   $fname = 'contributionrecur_'.$formName;
   if (function_exists($fname)) {
     $fname($form);
   }
-  // else { echo $fname; die(); }
 }
 
-/*
+/**
  * hook_civicrm_pageRun
  *
- * Similar for pageRuns
+ * @param \CRM_Core_Page $page
  */
 function contributionrecur_civicrm_pageRun(&$page) {
   $fname = 'contributionrecur_pageRun_'.$page->getVar('_name');
   if (function_exists($fname)) {
     $fname($page);
-  }
-  else { // echo $fname;
-    // watchdog('civicustom','hook_civicrm_pageRun for page @name',array('@name' => $fname));
   }
 }
 
@@ -215,7 +184,6 @@ function contributionrecur_civicrm_pre($op, $objectName, $objectId, &$params) {
       if (!empty($params['payment_processor_id'])) {
         $pp_id = $params['payment_processor_id'];
         $class_name = _contributionrecur_pp_info($pp_id,'class_name');
-        // watchdog('civicrm','hook_civicrm_pre class name = <pre>'.print_r($class_name,TRUE).'</pre>');
         if ('Payment_RecurOffline' == substr($class_name,0,20)) {
           if ('create' == $op) {
             if (5 != $params['contribution_status_id'] && empty($params['next_sched_contribution_date'])) {
@@ -307,12 +275,11 @@ function contributionrecur_civicrm_validateForm($formName, &$fields, &$files, &$
  */
 function _contributionrecur_payment_processor_id($contribution_recur_id) {
   $params = array(
-    'version' => 3,
     'sequential' => 1,
     'id' => $contribution_recur_id,
     'return' => 'payment_processor_id'
   );
-  $result = civicrm_api('ContributionRecur', 'getvalue', $params);
+  $result = civicrm_api3('ContributionRecur', 'getvalue', $params);
   if (empty($result)) {
     return FALSE;
     // TODO: log error
@@ -328,7 +295,6 @@ function _contributionrecur_payment_processor_id($contribution_recur_id) {
  */
 function _contributionrecur_pp_info($payment_processor_id, $return, $class_name = NULL) {
   $params = array(
-    'version' => 3,
     'sequential' => 1,
     'id' => $payment_processor_id,
     'return' => $return
@@ -336,7 +302,7 @@ function _contributionrecur_pp_info($payment_processor_id, $return, $class_name 
   if (!empty($class_name)) {
     $params['class_name'] = $class_name;
   }
-  $result = civicrm_api('PaymentProcessor', 'getvalue', $params);
+  $result = civicrm_api3('PaymentProcessor', 'getvalue', $params);
   if (empty($result)) {
     return FALSE;
     // TODO: log error
@@ -344,7 +310,7 @@ function _contributionrecur_pp_info($payment_processor_id, $return, $class_name 
   return $result;
 }
 
-/*
+/**
  * function _contributionrecur_next
  *
  * @param $from_time: a unix time stamp, the function returns values greater than this
@@ -352,6 +318,8 @@ function _contributionrecur_pp_info($payment_processor_id, $return, $class_name 
  *
  * A utility function to calculate the next available allowable day, starting from $from_time.
  * Strategy: increment the from_time by one day until the day of the month matches one of my available days of the month.
+ *
+ * @return float|int
  */
 function _contributionrecur_next($from_time, $allow_mdays) {
   $dp = getdate($from_time);
@@ -363,10 +331,11 @@ function _contributionrecur_next($from_time, $allow_mdays) {
   return $from_time;
 }
 
-/*
+/**
  * hook_civicrm_buildForm for back-end contribution forms
  *
  * Allow editing of contribution amounts!
+ * @param \CRM_Core_Form $form
  */
 function contributionrecur_CRM_Contribute_Form_Contribution(&$form) {
   // ignore this form unless I'm editing an contribution from my offline payment processor
@@ -387,11 +356,15 @@ function contributionrecur_CRM_Contribute_Form_Contribution(&$form) {
   }
 }
 
-/*
+/**
  * hook_civicrm_buildForm for public ("front-end") contribution forms
  *
  * Force recurring if it's an option on this form and configured in the settings
  * Add information about the next contribution if the allowed days are configured
+ *
+ * @param \CRM_Contribute_Form_Contribution_Main $form
+ *
+ * @throws \CRM_Core_Exception
  */
 function contributionrecur_CRM_Contribute_Form_Contribution_Main(&$form) {
   // ignore this form if I have no payment processor or there's no recurring option
@@ -444,10 +417,15 @@ function contributionrecur_CRM_Contribute_Form_Contribution_Main(&$form) {
 
 }
 
-/*
+/**
  * add some functionality to the update subscription form for recurring contributions
  *
  * Todo: make the available new fields configurable
+ *
+ * @param \CRM_Core_Form $form
+ *
+ * @throws \CRM_Core_Exception
+ * @throws \CiviCRM_API3_Exception
  */
 function contributionrecur_CRM_Contribute_Form_UpdateSubscription(&$form) {
   // only do this if the user is allowed to edit contributions. A more stringent permission might be smart.
@@ -525,14 +503,7 @@ function contributionrecur_CRM_Contribute_Form_UpdateSubscription(&$form) {
 /*
  *  Provide edit link for cancelled recurring contributions, allowing uncancel */
 function contributionrecur_CRM_Contribute_Form_Search(&$form) {
-  $version = CRM_Utils_System::version();
-  if (version_compare($version, '4.5') < 0) { /// support 4.4!
-    // a hackish way to inject these links into the form, they are displayed nicely using some javascript
-    // js provided by contribextra extension!
-  }
-  else { // the new and better way as of 4.5
-    CRM_Core_Resources::singleton()->addScriptFile('ca.civicrm.contributionrecur', 'js/subscription_uncancel.js');
-  }
+  CRM_Core_Resources::singleton()->addScriptFile('ca.civicrm.contributionrecur', 'js/subscription_uncancel.js');
 }
 
 /*
@@ -620,17 +591,17 @@ function _contributionrecur_get_iats_extra($recur) {
 function _contributionrecur_civicrm_getContributionTemplate($contribution) {
   // Get the most recent contribution in this series that matches the same total_amount, if present
   $template = array();
-  $get = array('version'  => 3, 'contribution_recur_id' => $contribution['contribution_recur_id'], 'options'  => array('sort'  => ' id DESC' , 'limit'  => 1));
+  $get = array('contribution_recur_id' => $contribution['contribution_recur_id'], 'options'  => array('sort'  => ' id DESC' , 'limit'  => 1));
   if (!empty($contribution['total_amount'])) {
     $get['total_amount'] = $contribution['total_amount'];
   }
-  $result = civicrm_api('contribution', 'get', $get);
+  $result = civicrm_api3('contribution', 'get', $get);
   if (!empty($result['values'])) {
     $contribution_ids = array_keys($result['values']);
     $template = $result['values'][$contribution_ids[0]];
     $template['line_items'] = array();
-    $get = array('version'  => 3, 'entity_table' => 'civicrm_contribution', 'entity_id' => $contribution_ids[0]);
-    $result = civicrm_api('LineItem', 'get', $get);
+    $get = array('entity_table' => 'civicrm_contribution', 'entity_id' => $contribution_ids[0]);
+    $result = civicrm_api3('LineItem', 'get', $get);
     if (!empty($result['values'])) {
       foreach($result['values'] as $initial_line_item) {
         $line_item = array();

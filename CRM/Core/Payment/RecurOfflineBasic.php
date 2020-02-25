@@ -1,17 +1,21 @@
 <?php
 /*
- * Placeholder clas for offline recurring payments
+ +--------------------------------------------------------------------+
+ | Copyright CiviCRM LLC. All rights reserved.                        |
+ |                                                                    |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
+ +--------------------------------------------------------------------+
  */
 
 use CRM_Contributionrecur_ExtensionUtil as E;
 
 class CRM_Core_Payment_RecurOfflineBasic extends CRM_Core_Payment {
 
-  use CRM_Core_Payment_RecurOfflineTrait;
+  use CRM_Core_Payment_MJWTrait;
 
   protected $_mode = NULL;
-
-  protected $_params = [];
 
   /**
    * Constructor
@@ -81,33 +85,16 @@ class CRM_Core_Payment_RecurOfflineBasic extends CRM_Core_Payment {
   }
 
   /**
-   * @param  array $params assoc array of input parameters for this transaction
+   * @param array|\Civi\Payment\PropertyBag $params
+   * @param string $component
    *
-   * @return array the result in a nice formatted array (or an error object)
-   * @public
+   * @return array|\Civi\Payment\PropertyBag
+   * @throws \CiviCRM_API3_Exception
    */
   public function doPayment(&$params, $component = 'contribute') {
     // Set default contribution status
     $params['contribution_status_id'] = CRM_Core_PseudoConstant::getKey('CRM_Contribute_BAO_Contribution', 'contribution_status_id', 'Pending');
 
-    /**
-    if ($this->_mode == 'test') {
-      $query             = "SELECT MAX(trxn_id) FROM civicrm_contribution WHERE trxn_id LIKE 'test\\_%'";
-      $p                 = array();
-      $trxn_id           = strval(CRM_Core_Dao::singleValueQuery($query, $p));
-      $trxn_id           = str_replace('test_', '', $trxn_id);
-      $trxn_id           = intval($trxn_id) + 1;
-      $params['trxn_id'] = sprintf('test_%08d', $trxn_id);
-    }
-    else {
-      $query             = "SELECT MAX(trxn_id) FROM civicrm_contribution WHERE trxn_id LIKE 'live_%'";
-      $p                 = array();
-      $trxn_id           = strval(CRM_Core_Dao::singleValueQuery($query, $p));
-      $trxn_id           = str_replace('live_', '', $trxn_id);
-      $trxn_id           = intval($trxn_id) + 1;
-      $params['trxn_id'] = sprintf('live_%08d', $trxn_id);
-    }
-*/
     if (!empty($params['is_recur']) && !empty($this->getRecurringContributionId($params))) {
       $reference = CRM_Utils_Array::value('reference_id', $params);
       if ($reference) {
@@ -130,24 +117,13 @@ class CRM_Core_Payment_RecurOfflineBasic extends CRM_Core_Payment {
     return $params;
   }
 
-  /** 
+  /**
    * Are back office payments supported.
    *
    * @return bool
    */
   protected function supportsBackOffice() {
     return TRUE;
-  }
-
-  function &error($errorCode = NULL, $errorMessage = NULL) {
-    $e = CRM_Core_Error::singleton();
-    if ($errorCode) {
-      $e->push($errorCode, 0, NULL, $errorMessage);
-    }
-    else {
-      $e->push(9001, 0, NULL, 'Unknown System Error.');
-    }
-    return $e;
   }
 
   /**
@@ -159,5 +135,6 @@ class CRM_Core_Payment_RecurOfflineBasic extends CRM_Core_Payment {
   function checkConfig() {
     return NULL;
   }
+
 }
 
