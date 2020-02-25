@@ -125,9 +125,9 @@ AND    {$this->_componentClause}";
       }
       try {
         // get details of last matching contribution
-        $params = array('version' => 3, 'sequential' => 1, 'contact_id' => $contact_id, 'financial_type_id' => $values['donation_ft_id'], 'options' => array('limit' => 1, 'sort' => 'id DESC')); // , 'contribution_recur_id' => array('>','0'));
+        $params = array('sequential' => 1, 'contact_id' => $contact_id, 'financial_type_id' => $values['donation_ft_id'], 'options' => array('limit' => 1, 'sort' => 'id DESC')); // , 'contribution_recur_id' => array('>','0'));
         $result = civicrm_api3('Contribution', 'get', $params);
-        $contribution = $result['values'][0]; 
+        $contribution = $result['values'][0];
         $hash = md5(uniqid(rand(), true));
         $membership_contribution = array(
           'version'        => 3,
