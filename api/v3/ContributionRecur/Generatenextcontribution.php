@@ -27,6 +27,11 @@ function _civicrm_api3_contribution_recur_generatenextcontribution_spec(&$spec) 
     'FKClassName' => 'CRM_Contribute_BAO_ContributionRecur',
     'api.required' => FALSE,
   ];
+  $spec['limit'] = [
+    'type' => CRM_Utils_Type::T_INT,
+    'title' => ts('Limit number to process in one go'),
+    'description' => 'If there are a lot for renewal this can be quite intensive. Optionally limit the number to process in a batch and run this API call multiple times',
+  ];
 }
 
 /**
@@ -42,6 +47,6 @@ function civicrm_api3_contribution_recur_generatenextcontribution($params) {
     Throw new CiviCRM_API3_Exception('Missing required parameter: payment_processor_id');
   }
   $recurGenerate = new CRM_Contributionrecur_Generate($params['payment_processor_id']);
-  $recurIDsUpdated = $recurGenerate->generate($params['contribution_recur_id'] ?? NULL);
+  $recurIDsUpdated = $recurGenerate->generate($params['contribution_recur_id'] ?? NULL, $params['limit'] ?? NULL);
   return civicrm_api3_create_success($recurIDsUpdated, $params, 'ContributionRecur', 'Generate');
 }

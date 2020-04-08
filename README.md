@@ -6,6 +6,9 @@ Useful extensions of recurring contribution functionality in CiviCRM. Particular
 * Adds a "Basic" recurring processor.
 * Hide recurring checkbox on contribution pages if forced.
 * Allow passing in "Other amount" via fixed_amount parameter on URL (configure a contribution page with other amount enabled) - other amount will be set to the value of the URL parameter and hidden.
+* Add API3:
+  * ContributionRecur.fixnextscheduleddates: This checks if the next_sched_contribution_date is empty and sets it to the date of the previous contribution + 1 period if it is.
+  * ContributionRecur.generatenextcontribution: This generates the next contribution using Contribution.repeattransaction and the next_sched_contribution_date.
 
 ## Reports
 

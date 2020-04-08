@@ -36,7 +36,7 @@ class CRM_Contributionrecur_Generate {
    * @throws \CRM_Core_Exception
    * @throws \CiviCRM_API3_Exception
    */
-  public function generate($recurringContributionID = NULL) {
+  public function generate($recurringContributionID = NULL, $limit = NULL) {
     $recurParams = [
       'payment_processor_id' => ['IN' => $this->paymentProcessorIDs],
       'options' => ['limit' => 0],
@@ -50,6 +50,7 @@ class CRM_Contributionrecur_Generate {
     $recurParams['next_sched_contribution_date'] = ['<=' => $dtCurrentDay];
     $listOfRecurs = civicrm_api3('ContributionRecur', 'get', $recurParams)['values'];
 
+    $count = 0;
     foreach ($listOfRecurs as $recurID => $recurDetail) {
       if (empty($recurDetail['next_sched_contribution_date'])) {
         Throw new CRM_Core_Exception('Cannot generate repeat contribution if we have an empty next_sched_contribution_date');
@@ -63,7 +64,12 @@ class CRM_Contributionrecur_Generate {
 
       civicrm_api3('Contribution', 'repeattransaction', $repeatContributionParams);
       $updatedRecurs[] = $recurID;
-      // @todo did this automatically update next_sched_contribution_date?
+      // @todo did this automatically update next_sched_contribution_date - yes with https://github.com/civicrm/civicrm-core/pull/17028
+      $count++;
+      if ($limit && ($count === $limit)) {
+        // We've processed enough for this batch
+        break;
+      }
     }
     return $updatedRecurs ?? [];
   }
