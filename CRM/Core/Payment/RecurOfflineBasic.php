@@ -13,8 +13,6 @@ use CRM_Contributionrecur_ExtensionUtil as E;
 
 class CRM_Core_Payment_RecurOfflineBasic extends CRM_Core_Payment {
 
-  use CRM_Core_Payment_MJWTrait;
-
   protected $_mode = NULL;
 
   /**
@@ -88,19 +86,25 @@ class CRM_Core_Payment_RecurOfflineBasic extends CRM_Core_Payment {
    * @param array|\Civi\Payment\PropertyBag $params
    * @param string $component
    *
-   * @return array|\Civi\Payment\PropertyBag
+   * @return array
    * @throws \CiviCRM_API3_Exception
    */
   public function doPayment(&$params, $component = 'contribute') {
-    // Set default contribution status
-    $params['contribution_status_id'] = CRM_Core_PseudoConstant::getKey('CRM_Contribute_BAO_Contribution', 'contribution_status_id', 'Pending');
+    $propertyBag = \Civi\Payment\PropertyBag::cast($params);
+    if (!$propertyBag->has('isRecur')) {
+      // This defaults to false from 5.27 (https://github.com/civicrm/civicrm-core/pull/17452) so we can remove this when minVer = 5.27
+      $propertyBag->setIsRecur(FALSE);
+    }
 
-    if (!empty($params['is_recur']) && !empty($this->getRecurringContributionId($params))) {
-      $reference = CRM_Utils_Array::value('reference_id', $params);
+    // Set default contribution status
+    $returnParams['payment_status_id'] = CRM_Core_PseudoConstant::getKey('CRM_Contribute_BAO_Contribution', 'contribution_status_id', 'Pending');
+
+    if ($propertyBag->getIsRecur() && $propertyBag->getContributionRecurID()) {
+      $reference = $propertyBag->getCustomProperty('reference_id');
       if ($reference) {
         // Save the external reference
         $recurParams = [
-          'id' => $this->getRecurringContributionId($params),
+          'id' => $propertyBag->getContributionRecurID(),
           'trxn_id' => $reference,
           'processor_id' => $reference,
         ];
@@ -109,11 +113,7 @@ class CRM_Core_Payment_RecurOfflineBasic extends CRM_Core_Payment {
     }
 
     // We always complete the first contribution as we are "adding" it.
-    $params['contribution_status_id'] = CRM_Core_PseudoConstant::getKey('CRM_Contribute_BAO_Contribution', 'contribution_status_id', 'Completed');
-    // We need to set this to ensure that contributions are set to the correct status
-    if (!empty($params['contribution_status_id'])) {
-      $params['payment_status_id'] = $params['contribution_status_id'];
-    }
+    $returnParams['payment_status_id'] = CRM_Core_PseudoConstant::getKey('CRM_Contribute_BAO_Contribution', 'contribution_status_id', 'Completed');
     return $params;
   }
 
@@ -134,6 +134,31 @@ class CRM_Core_Payment_RecurOfflineBasic extends CRM_Core_Payment {
    */
   function checkConfig() {
     return NULL;
+  }
+
+  /**
+   * Does this processor support cancelling recurring contributions through code.
+   *
+   * If the processor returns true it must be possible to take action from within CiviCRM
+   * that will result in no further payments being processed.
+   *
+   * @return bool
+   */
+  protected function supportsCancelRecurring() {
+    return TRUE;
+  }
+
+  /**
+   * Does the processor support the user having a choice as to whether to cancel the recurring with the processor?
+   *
+   * If this returns TRUE then there will be an option to send a cancellation request in the cancellation form.
+   *
+   * This would normally be false for processors where CiviCRM maintains the schedule.
+   *
+   * @return bool
+   */
+  protected function supportsCancelRecurringNotifyOptional() {
+    return FALSE;
   }
 
 }
