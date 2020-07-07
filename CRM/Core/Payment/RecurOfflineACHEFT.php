@@ -7,16 +7,7 @@ class CRM_Core_Payment_RecurOfflineACHEFT extends CRM_Core_Payment {
 
   protected $_mode = NULL;
 
-  protected $_params = array();
-
-  /**
-   * We only need one instance of this object. So we use the singleton
-   * pattern and cache the instance in this variable
-   *
-   * @var object
-   * @static
-   */
-  static private $_singleton = NULL;
+  protected $_params = [];
 
   /**
    * Constructor
@@ -32,31 +23,12 @@ class CRM_Core_Payment_RecurOfflineACHEFT extends CRM_Core_Payment {
   }
 
   /**
-   * singleton function used to manage this object
+   * @param array|\Civi\Payment\PropertyBag $params
+   * @param string $component
    *
-   * @param string $mode the mode of operation: live or test
-   *
-   * @return object
-   * @static
-   *
+   * @return array
    */
-  static function &singleton($mode, &$paymentProcessor, &$paymentForm = NULL, $force = FALSE) {
-    $processorName = $paymentProcessor['name'];
-    if (CRM_Utils_Array::value($processorName, self::$_singleton) === NULL) {
-      self::$_singleton[$processorName] = new CRM_Core_Payment_RecurOfflineACHEFT($mode, $paymentProcessor);
-    }
-    return self::$_singleton[$processorName];
-  }
-
-  /**
-   *
-   * @param  array $params assoc array of input parameters for this transaction
-   *
-   * @return array the result in a nice formatted array (or an error object)
-   * @public
-   */
-  function doDirectPayment(&$params) {
-
+  public function doPayment(&$params, $component = 'contribute') {
     if ($this->_mode == 'test') {
       $query             = "SELECT MAX(trxn_id) FROM civicrm_contribution WHERE trxn_id LIKE 'test\\_%'";
       $p                 = array();
@@ -73,16 +45,16 @@ class CRM_Core_Payment_RecurOfflineACHEFT extends CRM_Core_Payment {
       $trxn_id           = intval($trxn_id) + 1;
       $params['trxn_id'] = sprintf('live_%08d', $trxn_id);
     }
-    $params['gross_amount'] = $params['amount'];
-    $params['payment_status_id'] = 1;
+
+    $params['payment_status_id'] = CRM_Core_PseudoConstant::getKey('CRM_Contribute_BAO_Contribution', 'contribution_status_id', 'Pending');
     return $params;
   }
 
   public function getPaymentFormFields() {
     return [];
   }
-  
-  /** 
+
+  /**
    * Are back office payments supported.
    *
    * @return bool
