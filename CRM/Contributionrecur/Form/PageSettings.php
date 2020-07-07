@@ -12,6 +12,7 @@ class CRM_Contributionrecur_Form_PageSettings extends CRM_Contribute_Form_Contri
 
   public function preProcess() {
     parent::preProcess();
+    $this->setSelectedChild('recur');
   }
 
   /**
@@ -79,8 +80,8 @@ class CRM_Contributionrecur_Form_PageSettings extends CRM_Contribute_Form_Contri
     // get the submitted form values.
     $values = $this->controller->exportValues($this->_name);
     $settings = array(
-      'force_recur' => $values['force_recur'], 
-      'nice_recur' => $values['nice_recur'], 
+      'force_recur' => $values['force_recur'],
+      'nice_recur' => $values['nice_recur'],
     );
     // Source
     $page_id = $this->_id;
