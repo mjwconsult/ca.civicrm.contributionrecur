@@ -650,6 +650,9 @@ function contributionrecur_civicrm_tabset($tabsetName, &$tabs, $context) {
 }
 
 function contributionrecur_civicrm_buildAmount($pageType, &$form, &$amount) {
+  if (empty($form->_values['fee'])) {
+    return;
+  }
   foreach ($form->_values['fee'] as $fieldId => $fieldDetail) {
     if ($fieldDetail['name'] === 'other_amount') {
       if (CRM_Utils_Request::retrieveValue('fixed_amount', 'Float')) {
