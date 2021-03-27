@@ -25,7 +25,6 @@ class CRM_Core_Payment_RecurOfflineBasic extends CRM_Core_Payment {
   public function __construct($mode, &$paymentProcessor) {
     $this->_mode = $mode;
     $this->_paymentProcessor = $paymentProcessor;
-    $this->_processorName = $this->getPaymentTypeLabel();
   }
 
   /**
@@ -91,16 +90,12 @@ class CRM_Core_Payment_RecurOfflineBasic extends CRM_Core_Payment {
    */
   public function doPayment(&$params, $component = 'contribute') {
     $propertyBag = \Civi\Payment\PropertyBag::cast($params);
-    if (!$propertyBag->has('isRecur')) {
-      // This defaults to false from 5.27 (https://github.com/civicrm/civicrm-core/pull/17452) so we can remove this when minVer = 5.27
-      $propertyBag->setIsRecur(FALSE);
-    }
 
     // Set default contribution status
     $returnParams['payment_status_id'] = CRM_Core_PseudoConstant::getKey('CRM_Contribute_BAO_Contribution', 'contribution_status_id', 'Pending');
 
     if ($propertyBag->getIsRecur() && $propertyBag->getContributionRecurID()) {
-      $reference = $propertyBag->getCustomProperty('reference_id');
+      $reference = $propertyBag->getter('reference_id', TRUE);
       if ($reference) {
         // Save the external reference
         $recurParams = [
