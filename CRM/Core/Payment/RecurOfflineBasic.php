@@ -13,6 +13,8 @@ use CRM_Contributionrecur_ExtensionUtil as E;
 
 class CRM_Core_Payment_RecurOfflineBasic extends CRM_Core_Payment {
 
+  use CRM_Core_Payment_MJWTrait;
+
   protected $_mode = NULL;
 
   /**
@@ -93,6 +95,7 @@ class CRM_Core_Payment_RecurOfflineBasic extends CRM_Core_Payment {
 
     // Set default contribution status
     $returnParams['payment_status_id'] = CRM_Core_PseudoConstant::getKey('CRM_Contribute_BAO_Contribution', 'contribution_status_id', 'Pending');
+    $returnParams['payment_status'] = 'Pending';
 
     if ($propertyBag->getIsRecur() && $propertyBag->getContributionRecurID()) {
       $reference = $propertyBag->getter('reference_id', TRUE);
@@ -109,7 +112,9 @@ class CRM_Core_Payment_RecurOfflineBasic extends CRM_Core_Payment {
 
     // We always complete the first contribution as we are "adding" it.
     $returnParams['payment_status_id'] = CRM_Core_PseudoConstant::getKey('CRM_Contribute_BAO_Contribution', 'contribution_status_id', 'Completed');
-    return $params;
+    $returnParams['payment_status'] = 'Completed';
+    $this->endDoPayment($returnParams);
+    return $returnParams;
   }
 
   /**
