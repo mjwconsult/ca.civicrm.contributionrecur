@@ -11,6 +11,8 @@
 
 class CRM_Contributionrecur_Generate {
 
+  use CRM_Core_Payment_MJWIPNTrait;
+
   /**
    * @var int The payment processor IDs (array of live and test IDs)
    */
@@ -56,15 +58,18 @@ class CRM_Contributionrecur_Generate {
         Throw new CRM_Core_Exception('Cannot generate repeat contribution if we have an empty next_sched_contribution_date');
       }
       $repeatContributionParams = [
-        'contribution_status_id' => "Completed",
-        'is_email_receipt' => 0,
+        'contribution_status_id' => 'Completed',
         'receive_date' => $recurDetail['next_sched_contribution_date'],
         'contribution_recur_id' => $recurID,
+        'order_reference' => '',
+        'trxn_id' => '',
       ];
 
-      civicrm_api3('Contribution', 'repeattransaction', $repeatContributionParams);
+      $this->setPaymentProcessor($recurDetail['payment_processor_id']);
+      $this->setSendEmailReceipt(0);
+      $this->repeatContribution($repeatContributionParams);
+
       $updatedRecurs[] = $recurID;
-      // @todo did this automatically update next_sched_contribution_date - yes with https://github.com/civicrm/civicrm-core/pull/17028
       $count++;
       if ($limit && ($count === $limit)) {
         // We've processed enough for this batch
