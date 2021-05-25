@@ -7,8 +7,6 @@ class CRM_Core_Payment_RecurOffline extends CRM_Core_Payment {
 
   protected $_mode = NULL;
 
-  protected $_params = [];
-
   /**
    * Constructor
    *
@@ -57,7 +55,7 @@ class CRM_Core_Payment_RecurOffline extends CRM_Core_Payment {
     return TRUE;
   }
 
-  /** 
+  /**
    * No cc form fields!
    *
    */
@@ -75,17 +73,6 @@ class CRM_Core_Payment_RecurOffline extends CRM_Core_Payment {
   public function changeSubscriptionAmount(&$message = '', $params = []) {
     $message = 'The recurring amount has been changed in CiviCRM. This has not changed the offline process.';
     return TRUE;
-  }
-
-  function &error($errorCode = NULL, $errorMessage = NULL) {
-    $e = CRM_Core_Error::singleton();
-    if ($errorCode) {
-      $e->push($errorCode, 0, NULL, $errorMessage);
-    }
-    else {
-      $e->push(9001, 0, NULL, 'Unknown System Error.');
-    }
-    return $e;
   }
 
   /**
