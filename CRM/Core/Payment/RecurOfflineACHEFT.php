@@ -7,8 +7,6 @@ class CRM_Core_Payment_RecurOfflineACHEFT extends CRM_Core_Payment {
 
   protected $_mode = NULL;
 
-  protected $_params = [];
-
   /**
    * Constructor
    *
@@ -19,7 +17,6 @@ class CRM_Core_Payment_RecurOfflineACHEFT extends CRM_Core_Payment {
   public function __construct($mode, &$paymentProcessor) {
     $this->_mode = $mode;
     $this->_paymentProcessor = $paymentProcessor;
-    $this->_processorName = ts('Recurring Offline ACH/EFT Placeholder Processor');
   }
 
   /**
@@ -81,26 +78,14 @@ class CRM_Core_Payment_RecurOfflineACHEFT extends CRM_Core_Payment {
     return TRUE;
   }
 
-
-  function &error($errorCode = NULL, $errorMessage = NULL) {
-    $e = CRM_Core_Error::singleton();
-    if ($errorCode) {
-      $e->push($errorCode, 0, NULL, $errorMessage);
-    }
-    else {
-      $e->push(9001, 0, NULL, 'Unknown System Error.');
-    }
-    return $e;
-  }
-
   /**
    * This function checks to see if we have the right config values
    *
    * @return string the error message if any
-   * @public
    */
-  function checkConfig() {
+  public function checkConfig() {
     return NULL;
   }
+
 }
 
