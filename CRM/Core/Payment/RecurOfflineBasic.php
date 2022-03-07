@@ -113,8 +113,7 @@ class CRM_Core_Payment_RecurOfflineBasic extends CRM_Core_Payment {
     // We always complete the first contribution as we are "adding" it.
     $returnParams['payment_status_id'] = CRM_Core_PseudoConstant::getKey('CRM_Contribute_BAO_Contribution', 'contribution_status_id', 'Completed');
     $returnParams['payment_status'] = 'Completed';
-    $this->endDoPayment($returnParams);
-    return $returnParams;
+    return $this->endDoPayment($returnParams);
   }
 
   /**
