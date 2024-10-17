@@ -13,24 +13,27 @@
     <url desc="Support">https://mjw.pt/support/contributionrecur</url>
     <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
-  <releaseDate>2023-01-01</releaseDate>
-  <version>99.MJW.1.6</version>
+  <releaseDate>2024-10-17</releaseDate>
+  <version>99.MJW.1.6.1</version>
   <develStage>stable</develStage>
   <compatibility>
-    <ver>5.55</ver>
+    <ver>5.78</ver>
   </compatibility>
   <requires>
     <ext>mjwshared</ext>
   </requires>
   <civix>
     <namespace>CRM/Contributionrecur</namespace>
-    <format>22.10.0</format>
+    <format>24.09.1</format>
   </civix>
   <mixins>
     <mixin>menu-xml@1.0.0</mixin>
     <mixin>mgd-php@1.0.0</mixin>
+    <mixin>smarty@1.0.3</mixin>
+    <mixin>entity-types-php@2.0.0</mixin>
   </mixins>
   <classloader>
     <psr0 prefix="CRM_" path="."/>
+    <psr4 prefix="Civi\" path="Civi"/>
   </classloader>
 </extension>
